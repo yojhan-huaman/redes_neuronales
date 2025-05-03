@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import os
 import random
 import torch
@@ -27,12 +27,17 @@ logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
-# Initialize global variables
+# Initialize global variables with default values
+# These need to match exactly what's expected in the HTML template
+default_symptoms = [
+    'dolor_muscular', 'dolor_de_garganta', 'dificultad_para_respirar', 'tos', 
+    'fiebre', 'cansancio', 'dolor_de_estomago', 'náuseas', 'vómitos',
+    'dolor_abdominal', 'escurrimiento_nasal', 'dolor_de_cabeza',
+    'perdida_del_apetito', 'diarrea'
+]
+
 model = None
-symptoms = ['tos', 'fiebre', 'cansancio', 'dolor_de_cabeza', 'dolor_muscular', 
-           'dolor_de_garganta', 'dificultad_para_respirar', 'dolor_de_estomago',
-           'náuseas', 'vómitos', 'dolor_abdominal', 'escurrimiento_nasal',
-           'perdida_del_apetito', 'diarrea']
+symptoms = default_symptoms
 diseases = None
 idx_to_disease = None
 scaler = None
@@ -107,21 +112,28 @@ def load_data():
     try:
         # Check if pickle files exist
         required_files = ['symptoms.pkl', 'diseases.pkl', 'idx_to_disease.pkl', 'scaler.pkl']
+        missing_files = []
+        
         for file in required_files:
             if not os.path.exists(file):
                 logger.error(f"File not found: {file}")
-                return False
+                missing_files.append(file)
+        
+        if missing_files:
+            logger.error(f"Missing required files: {', '.join(missing_files)}")
+            return False
                 
         # Try to load each file
         with open('symptoms.pkl', 'rb') as f:
             loaded_symptoms = pickle.load(f)
             if loaded_symptoms:  # Only update if not empty
-                symptoms = loaded_symptoms
-                logger.info("Symptoms loaded successfully")
+                # Make sure symptoms are in the expected format (with underscores)
+                symptoms = [sym.replace(' ', '_').lower() for sym in loaded_symptoms]
+                logger.info(f"Symptoms loaded successfully: {symptoms}")
                 
         with open('diseases.pkl', 'rb') as f:
             diseases = pickle.load(f)
-            logger.info("Diseases loaded successfully")
+            logger.info(f"Diseases loaded successfully: {len(diseases)} diseases")
             
         with open('idx_to_disease.pkl', 'rb') as f:
             idx_to_disease = pickle.load(f)
@@ -152,16 +164,17 @@ def load_data():
 
 @app.route('/')
 def index():
-    # No need for global declaration since we're not modifying symptoms
     logger.info("Serving index page")
+    logger.info(f"Using symptoms: {symptoms}")
     return render_template('index.html', symptoms=symptoms)
 
 @app.route('/predict', methods=['POST'])
 def predict():
     logger.info("Received prediction request")
     
-    if model is None or symptoms is None or idx_to_disease is None or scaler is None:
-        logger.error("Model not fully loaded, cannot make prediction")
+    # Check if model components are loaded
+    if model is None:
+        logger.error("Model not loaded, cannot make prediction")
         return render_template('index.html', symptoms=symptoms, 
                              error="El modelo no está disponible. Por favor, inténtelo más tarde.")
 
@@ -175,17 +188,24 @@ def predict():
                                  error="Por favor seleccione al menos un síntoma")
 
         translated_symptoms = [symptom_translation.get(symptom, symptom) for symptom in selected_symptoms]
+        logger.info(f"Translated symptoms: {translated_symptoms}")
 
+        # Make prediction
         predicted_disease, probabilities = predict_disease(
             model, selected_symptoms, symptoms, scaler, idx_to_disease
         )
         
         logger.info(f"Prediction successful: {predicted_disease}")
 
+        # Get top diseases
         top_indices = np.argsort(probabilities)[-3:][::-1]
         top_diseases = [(idx_to_disease[idx], float(probabilities[idx]) * 100) for idx in top_indices]
+        logger.info(f"Top diseases: {top_diseases}")
 
+        # Generate chart
         chart_data = generate_pie_chart(top_diseases, is_dark_mode=dark_mode)
+        if chart_data is None:
+            logger.warning("Failed to generate chart")
 
         return render_template(
             'index.html',
@@ -206,31 +226,41 @@ def update_chart():
     try:
         logger.info("Received chart update request")
         
-        if model is None or symptoms is None or idx_to_disease is None or scaler is None:
-            logger.error("Model not fully loaded, cannot update chart")
-            return {"error": "Model not available"}, 500
+        if model is None:
+            logger.error("Model not loaded, cannot update chart")
+            return jsonify({"error": "Model not available"}), 500
             
         dark_mode = request.form.get('dark_mode') == 'true'
-        selected_symptoms = ['fiebre', 'tos', 'dolor_de_cabeza']
+        selected_symptoms = ['fiebre', 'tos', 'dolor_de_cabeza']  # Default symptoms for chart update
 
+        # Make prediction
         predicted_disease, probabilities = predict_disease(
             model, selected_symptoms, symptoms, scaler, idx_to_disease
         )
 
+        # Get top diseases
         top_indices = np.argsort(probabilities)[-3:][::-1]
         top_diseases = [(idx_to_disease[idx], float(probabilities[idx]) * 100) for idx in top_indices]
 
+        # Generate chart
         chart_data = generate_pie_chart(top_diseases, is_dark_mode=dark_mode)
-        return {"chart_data": chart_data}
+        if chart_data is None:
+            return jsonify({"error": "Failed to generate chart"}), 500
+            
+        return jsonify({"chart_data": chart_data})
     except Exception as e:
         logger.error(f"Error updating chart: {e}")
         logger.error(traceback.format_exc())
-        return {"error": str(e)}, 500
+        return jsonify({"error": str(e)}), 500
 
 # Try to load data at startup
+logger.info("Starting application...")
 model_loaded = load_data()
 if not model_loaded:
     logger.warning("Model initialization failed. App will run with limited functionality.")
+    # Use default symptoms list
+    symptoms = default_symptoms
+    logger.info(f"Using default symptoms: {symptoms}")
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
