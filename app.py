@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 from model import DiseaseClassifier, load_model, predict_disease
 import matplotlib
-matplotlib.use('Agg')  # Usa el backend sin GUI
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
 import io
@@ -14,7 +14,6 @@ import base64
 
 app = Flask(__name__)
 
-# Diccionario para mapear los síntomas con nombres legibles
 symptom_translation = {
     'dolor_muscular': 'Dolor muscular',
     'dolor_de_garganta': 'Dolor de garganta',
@@ -32,7 +31,6 @@ symptom_translation = {
     'diarrea': 'Diarrea',
 }
 
-# Variables globales
 model = None
 symptoms = None
 diseases = None
@@ -163,7 +161,6 @@ def update_chart():
     chart_data = generate_pie_chart(top_diseases, is_dark_mode=dark_mode)
     return {"chart_data": chart_data}
 
-# Cargar datos antes de levantar la app
 try:
     load_data()
 except Exception as e:
