@@ -11,11 +11,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import io
 import base64
-from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 app = Flask(__name__)
 
-# Diccionario para mapear los síntomas con formato de codificación a un nombre más legible
+# Diccionario para mapear los síntomas con nombres legibles
 symptom_translation = {
     'dolor_muscular': 'Dolor muscular',
     'dolor_de_garganta': 'Dolor de garganta',
@@ -33,39 +32,31 @@ symptom_translation = {
     'diarrea': 'Diarrea',
 }
 
-# Función para generar el gráfico de torta (pie chart)
-def generate_pie_chart(top_diseases, is_dark_mode=False):
-    labels = []
-    data = []
-    total = 0
+# Variables globales
+model = None
+symptoms = None
+diseases = None
+idx_to_disease = None
+scaler = None
 
-    for disease in top_diseases:
-        labels.append(disease[0])
-        data.append(disease[1])
-        total += disease[1]
+def generate_pie_chart(top_diseases, is_dark_mode=False):
+    labels = [d[0] for d in top_diseases]
+    data = [d[1] for d in top_diseases]
+    total = sum(data)
 
     other = 100 - total
     if other > 0.5:
         labels.append('Otras enfermedades')
         data.append(other)
 
-    # Generar colores aleatorios
-    def random_color():
-        return f'#{random.randint(0, 0xFFFFFF):06x}'
-
-    random_colors = [random_color() for _ in range(len(labels))]
-
-    # Colores dinámicos según modo oscuro
+    random_colors = [f'#{random.randint(0, 0xFFFFFF):06x}' for _ in range(len(labels))]
     label_color = 'white' if is_dark_mode else 'black'
     title_color = 'white' if is_dark_mode else 'black'
 
-    # Crear gráfico con fondo transparente
     fig = plt.figure(figsize=(8, 8), facecolor='none')
     sns.set(style="whitegrid")
     ax = fig.add_subplot(111)
-    ax.set_facecolor('none')  # Fondo transparente
-
-    # Limpiar el gráfico anterior
+    ax.set_facecolor('none')
     ax.clear()
 
     wedges, texts, autotexts = ax.pie(
@@ -76,11 +67,8 @@ def generate_pie_chart(top_diseases, is_dark_mode=False):
         startangle=140
     )
 
-    # Aplica correctamente los colores a las etiquetas y los porcentajes
-    plt.setp(texts, color=label_color)       # Etiquetas
-    plt.setp(autotexts, color=label_color)   # Porcentajes
-
-    # Título con color correcto
+    plt.setp(texts, color=label_color)
+    plt.setp(autotexts, color=label_color)
     ax.set_title("Distribución de Probabilidades", color=title_color, fontsize=14, weight='bold')
 
     img = io.BytesIO()
@@ -91,15 +79,10 @@ def generate_pie_chart(top_diseases, is_dark_mode=False):
     plt.close(fig)
     return chart_data
 
-# Función para cargar los datos del modelo
 def load_data():
     global model, symptoms, diseases, idx_to_disease, scaler
-    if (os.path.exists('disease_classifier.pth') and 
-        os.path.exists('symptoms.pkl') and 
-        os.path.exists('diseases.pkl') and 
-        os.path.exists('idx_to_disease.pkl') and
-        os.path.exists('scaler.pkl')):
-
+    print("Cargando archivos del modelo...")
+    try:
         with open('symptoms.pkl', 'rb') as f:
             symptoms = pickle.load(f)
         with open('diseases.pkl', 'rb') as f:
@@ -114,10 +97,10 @@ def load_data():
         num_classes = len(diseases)
         model = load_model(input_size, hidden_size, num_classes)
 
-        print("Modelo y datos cargados correctamente")
-    else:
-        print("Error: Archivos del modelo no encontrados. Ejecute train.py primero.")
-        raise FileNotFoundError("No se encontraron los archivos necesarios para el modelo. Por favor, ejecute train.py.")
+        print("Modelo y datos cargados correctamente.")
+    except Exception as e:
+        print(f"Error al cargar los datos del modelo: {e}")
+        raise
 
 @app.route('/', methods=['GET', 'HEAD'])
 def index():
@@ -125,40 +108,35 @@ def index():
     if request.method == 'HEAD':
         return '', 200
 
-    if 'symptoms' not in globals():
+    if symptoms is None:
         return "Error: los datos del modelo no se cargaron correctamente.", 500
 
     return render_template('index.html', symptoms=symptoms)
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    global model, symptoms, scaler, idx_to_disease
+
+    if symptoms is None:
+        return "Error: los datos del modelo no se cargaron correctamente.", 500
+
     print("Recibiendo solicitud de predicción...")
-
-    # Obtener el valor de dark_mode desde el formulario
     dark_mode = request.form.get('dark_mode') == 'true'
-    print(f"Modo oscuro activado: {dark_mode}")  # Verificar si se ha recibido correctamente
-
     selected_symptoms = request.form.getlist('symptoms')
-    
+
     if not selected_symptoms:
         return render_template('index.html', symptoms=symptoms, error="Por favor seleccione al menos un síntoma")
 
     translated_symptoms = [symptom_translation.get(symptom, symptom) for symptom in selected_symptoms]
 
-    # Realizar la predicción
     predicted_disease, probabilities = predict_disease(
         model, selected_symptoms, symptoms, scaler, idx_to_disease
     )
-    
-    # Obtener las 3 enfermedades más probables
+
     top_indices = np.argsort(probabilities)[-3:][::-1]
     top_diseases = [(idx_to_disease[idx], float(probabilities[idx]) * 100) for idx in top_indices]
-    
-    # Generar el gráfico de torta
-    chart_data = generate_pie_chart(top_diseases, is_dark_mode=dark_mode)
 
-    print(f"Predicción: {predicted_disease}")
-    print(f"Top enfermedades: {top_diseases}")
+    chart_data = generate_pie_chart(top_diseases, is_dark_mode=dark_mode)
 
     return render_template(
         'index.html',
@@ -171,27 +149,27 @@ def predict():
 
 @app.route('/update_chart', methods=['POST'])
 def update_chart():
-    # Obtener el valor de dark_mode desde el formulario (AJAX)
+    global model, symptoms, scaler, idx_to_disease
     dark_mode = request.form.get('dark_mode') == 'true'
-    print(f"Modo oscuro activado: {dark_mode}")  # Verificar si se ha recibido correctamente
+    selected_symptoms = ['fiebre', 'tos', 'dolor_de_cabeza']
 
-    # Aquí seleccionamos algunos síntomas para generar el gráfico (puedes modificar esta parte)
-    selected_symptoms = ['fiebre', 'tos', 'dolor_de_cabeza']  # Ejemplo de síntomas
-
-    # Realizar la predicción (puedes modificarlo según tu lógica)
     predicted_disease, probabilities = predict_disease(
         model, selected_symptoms, symptoms, scaler, idx_to_disease
     )
-    
-    # Obtener las 3 enfermedades más probables
+
     top_indices = np.argsort(probabilities)[-3:][::-1]
     top_diseases = [(idx_to_disease[idx], float(probabilities[idx]) * 100) for idx in top_indices]
-    
-    # Generar el gráfico de torta
-    chart_data = generate_pie_chart(top_diseases, is_dark_mode=dark_mode)
 
-    # Retornar el gráfico como Base64
+    chart_data = generate_pie_chart(top_diseases, is_dark_mode=dark_mode)
     return {"chart_data": chart_data}
-load_data()
+
+# Cargar datos antes de levantar la app
+try:
+    load_data()
+except Exception as e:
+    print(f"No se pudo iniciar la app por error en load_data: {e}")
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    import os
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
