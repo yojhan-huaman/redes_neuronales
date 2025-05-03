@@ -1,7 +1,7 @@
 body {
     font-family: 'Georgia', serif;
-    background-color: #faf3e0; /* Fondo beige claro para un estilo más clásico */   
-    color: #000000; /* Establecer el color del texto a negro */
+    background-color: #faf3e0;   
+    color: #000000;  
     line-height: 1.6;
     margin: 0;
     padding: 0;
@@ -18,34 +18,34 @@ body {
 .centered-image-container img {
     max-width: 100%;
     height: auto;
-    border-radius: 8px; /* Bordes redondeados sutiles para un toque clásico */
+    border-radius: 8px;
 }
 
 h1, h4, h5, .btn, .form-text {
     font-family: 'Times New Roman', serif;
-    color: #000000 !important; /* Forzar que el color de los títulos y botones sea negro */
-    text-transform: uppercase; /* Mayúsculas para un estilo clásico y formal */
-    letter-spacing: 1px; /* Espaciado para mayor elegancia */
+    color: #000000 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
     font-weight: normal;
 }
 
 .card {
-    border: 1px solid #d1c4b5; /* Borde suave beige claro para las tarjetas */
-    background-color: #fff8e1; /* Fondo suave de color crema */
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Sombra ligera para profundidad */
+    border: 1px solid #d1c4b5;
+    background-color: #fff8e1;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     padding: 1.5rem;
     transition: box-shadow 0.3s ease;
 }
 
 .card:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Sombra más intensa en hover */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
 .btn-pinkie {
-    background-color: #8d6e63; /* Botón en tono marrón suave */
+    background-color: #8d6e63;
     color: #fff;
-    border: 1px solid #6d4c41; /* Borde en tono más oscuro del botón */
+    border: 1px solid #6d4c41;
     font-weight: bold;
     border-radius: 20px;
     padding: 12px 24px;
@@ -54,21 +54,21 @@ h1, h4, h5, .btn, .form-text {
 }
 
 .btn-pinkie:hover {
-    background-color: #6d4c41; /* Cambio a un tono marrón más oscuro */
+    background-color: #6d4c41;
     transform: translateY(-2px) scale(1.05);
 }
 
 .pinkie-badge {
     background-color: #c0c0c0;
-    color: #000000; /* Texto en negro para mayor visibilidad */
+    color: #000000;
     font-weight: bold;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
 .pinkie-alert {
-    background-color: #fff8e1; /* Fondo amarillo claro */
-    color: #000000; /* Texto negro para contraste */
-    border: 1px solid #d1c4b5; /* Borde suave */
+    background-color: #fff8e1;
+    color: #000000;
+    border: 1px solid #d1c4b5;
     border-radius: 10px;
     padding: 15px;
 }
@@ -81,15 +81,15 @@ h1, h4, h5, .btn, .form-text {
 }
 
 .list-group-item {
-    background-color: #f9f1e7; /* Fondo crema suave */
+    background-color: #f9f1e7;
     transition: background-color 0.3s ease;
     border-left: 5px solid transparent;
     border-radius: 8px;
 }
 
 .list-group-item:hover {
-    background-color: #f1e0b6; /* Cambio de fondo suave en hover */
-    border-left: 5px solid #8d6e63; /* Borde marrón suave */
+    background-color: #f1e0b6;
+    border-left: 5px solid #8d6e63;
 }
 
 .select2-container--default .select2-selection--multiple {
@@ -103,18 +103,18 @@ h1, h4, h5, .btn, .form-text {
 .select2-container--default .select2-selection--multiple .select2-selection__choice {
     background-color: #d9d9d9;
     border-color: #bfbfbf;
-    color: #000000 !important; /* Forzar color negro para las opciones seleccionadas */
+    color: #000000 !important;
 }
 
 body.dark-mode .select2-container--default .select2-selection--multiple .select2-selection__choice {
     background-color: #000000;
     border-color: #bfbfbf;
-    color: white !important; /* Forzar color negro para las opciones seleccionadas */
+    color: white !important;
 }
 
 body.dark-mode {
-    background-color: #1e1e1e; /* Fondo oscuro real */
-    color: #f0f0f0; /* Texto claro */
+    background-color: #1e1e1e;
+    color: #f0f0f0;
 }
 
 body.dark-mode .card {
@@ -147,7 +147,7 @@ body.dark-mode .select2-container--default .select2-selection--multiple .select2
 }
 
 body.dark-mode .btn-pinkie {
-    background: linear-gradient(to right, #5d4037, #8d6e63); /* Marrón oscuro degradado */
+    background: linear-gradient(to right, #5d4037, #8d6e63);
     color: #ffffff;
 }
 
@@ -188,7 +188,6 @@ body.dark-mode .list-group-item:hover {
     border-left-color: #5d4037;
 }
 
-/* Modo Responsive */
 @media (max-width: 768px) {
     .centered-image-container {
         flex-direction: column;
