@@ -121,8 +121,13 @@ def load_data():
 
 @app.route('/', methods=['GET', 'HEAD'])
 def index():
+    global symptoms
     if request.method == 'HEAD':
         return '', 200
+
+    if 'symptoms' not in globals():
+        return "Error: los datos del modelo no se cargaron correctamente.", 500
+
     return render_template('index.html', symptoms=symptoms)
 
 @app.route('/predict', methods=['POST'])
