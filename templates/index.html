@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diagnóstico Médico - Clasificador de Enfermedades</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Diagnóstico Médico con IA</h1>
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Clasificador de Enfermedades basado en Síntomas</h5>
+                <button onclick="toggleDarkMode()" class="btn btn-sm btn-outline-secondary">🌙 Modo Oscuro</button>
+            </div>
+            <div class="card-body">
+                <form id="symptomForm" method="POST" action="/predict">
+                    <div class="mb-4">
+                        <label for="symptomsSelect" class="form-label">Seleccione sus síntomas:</label>
+                        <select class="form-select select2" id="symptomsSelect" name="symptoms" multiple>
+                            {% for symptom in symptoms %}
+                            <option value="{{ symptom }}">{{ symptom.replace('_', ' ') | title }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text">Seleccione todos los síntomas que experimenta.</div>
+                    </div>
+
+                    <input type="hidden" id="darkModeInput" name="dark_mode" value="false">
+                    <button type="submit" class="btn btn-pinkie">Diagnosticar</button>
+                </form>
+
+                {% if error %}
+                <div class="alert alert-danger mt-4">
+                    <strong>Error:</strong> {{ error }}
+                </div>
+                {% endif %}
+
+                {% if prediction %}
+                <div id="resultBox" class="result-box mt-4">
+                    <h4>Resultado del diagnóstico:</h4>
+                    <p><strong>Enfermedad predicha:</strong> {{ prediction }}</p>
+
+                    <div class="mt-4">
+                        <h5>Distribución de Probabilidades:</h5>
+                        <div class="centered-image-container">
+                            <img id="chartImage" src="data:image/png;base64,{{ chart_data }}" alt="Gráfico de Probabilidades" class="img-fluid">
+                        </div>
+                    </div>                    
+
+                    <h5 class="mt-4">Top 3 Enfermedades más probables:</h5>
+                    <ul class="list-group">
+                        {% for disease, prob in top_diseases %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            {{ disease | title }}
+                            <span class="badge pinkie-badge rounded-pill">{{ prob | round(2) }}%</span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="mt-4">
+                        <h5>Síntomas seleccionados:</h5>
+                        <ul class="list-group">
+                            {% for symptom in selected_symptoms %}
+                            <li class="list-group-item">{{ symptom | title }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+
+                    <div class="alert pinkie-alert mt-4">
+                        <strong>Nota importante:</strong> Este diagnóstico es solo una predicción basada en algoritmos de IA.
+                        No reemplaza el consejo médico profesional. Siempre consulte a un médico para un diagnóstico preciso.
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.2.3/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            // Configuración de select2
+            $('#symptomsSelect').select2({
+                placeholder: "Seleccione los síntomas...",
+                allowClear: true
+            });
+        
+            // Verificar si el modo oscuro está habilitado en el localStorage
+            const darkModeEnabled = localStorage.getItem("darkMode") === "true";
+            if (darkModeEnabled) {
+                document.body.classList.add("dark-mode");
+                document.getElementById('darkModeInput').value = 'true';
+            }
+        
+            // Alternar el modo oscuro
+            window.toggleDarkMode = function () {
+                document.body.classList.toggle('dark-mode');
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                document.getElementById('darkModeInput').value = isDarkMode ? 'true' : 'false';
+                localStorage.setItem("darkMode", isDarkMode);
+
+                // Actualizar el gráfico al cambiar el modo oscuro
+                updateChart(isDarkMode);
+            };
+
+            // Función AJAX para actualizar el gráfico según el modo oscuro
+            function updateChart(isDarkMode) {
+                $.ajax({
+                    url: '/update_chart',
+                    method: 'POST',
+                    data: { dark_mode: isDarkMode },
+                    success: function(response) {
+                        // Actualizar la imagen del gráfico con el nuevo gráfico
+                        $('#chartImage').attr('src', 'data:image/png;base64,' + response.chart_data);
+                    }
+                });
+            }
+
+            // Verificar el valor de dark_mode antes de enviar el formulario
+            $('#symptomForm').submit(function() {
+                const isDarkMode = document.body.classList.contains('dark-mode');
+                document.getElementById('darkModeInput').value = isDarkMode ? 'true' : 'false';
+                console.log("Valor de dark_mode:", document.getElementById('darkModeInput').value);
+            });
+        });
+    </script>
+
+</body>
+
+</html>

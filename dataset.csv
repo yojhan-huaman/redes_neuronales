@@ -1,0 +1,41 @@
+fiebre,dolor_cabeza,nauseas,dolor_muscular,fatiga,tos,dolor_garganta,dificultad_respirar,perdida_olfato,diarrea,dolor_abdominal,erupciones,congestion_nasal,enfermedad
+1,1,0,1,1,1,1,0,0,0,0,0,1,Influenza
+1,1,1,1,1,0,0,0,0,0,0,0,0,Migraña
+1,0,1,0,1,0,0,0,0,1,1,0,0,Gastroenteritis
+1,1,0,1,1,1,1,1,1,0,0,0,1,COVID-19
+0,0,0,0,0,1,1,0,0,0,0,0,1,Resfriado común
+1,1,0,1,1,0,0,0,0,0,0,1,0,Dengue
+1,0,0,0,1,0,0,0,0,1,1,0,0,Intoxicación alimentaria
+1,1,0,1,1,1,0,1,0,0,0,0,0,Neumonía
+0,1,1,0,1,0,0,0,0,0,1,0,0,Síndrome de intestino irritable
+1,1,0,0,1,0,0,0,0,0,0,1,0,Sarampión
+0,1,0,0,0,0,0,0,0,0,0,0,0,Cefalea tensional
+1,0,1,1,1,0,0,0,0,1,1,0,0,Apendicitis
+0,0,0,0,1,1,1,0,0,0,0,0,1,Rinitis alérgica
+1,0,0,1,1,0,0,0,0,0,0,0,0,Fiebre muscular
+0,0,0,0,0,0,1,0,0,0,0,0,0,Faringitis
+1,1,1,1,1,0,0,0,0,0,0,0,0,Fiebre tifoidea
+0,0,0,0,0,0,0,0,0,1,1,0,0,Estreñimiento
+1,1,0,1,1,1,0,1,0,0,0,0,0,Bronquitis
+0,0,1,0,0,0,0,0,0,1,1,0,0,Gastritis
+1,1,0,0,0,0,0,0,0,0,0,1,0,Rubéola
+1,0,0,1,1,0,0,0,0,0,0,0,0,Mononucleosis
+1,1,0,0,1,0,0,0,0,0,0,1,1,Varicela
+0,0,0,0,1,1,1,1,0,0,0,0,1,Asma
+1,1,1,0,1,0,0,0,0,0,0,0,0,Meningitis
+0,0,0,0,0,0,0,0,0,1,1,0,0,Colitis
+1,0,0,0,1,0,0,0,0,1,1,0,0,Infección urinaria
+0,1,0,0,0,0,0,0,0,0,0,0,0,Hipertensión
+1,0,0,0,1,0,0,0,0,0,0,1,0,Hepatitis A
+0,0,1,0,1,0,0,0,0,1,1,0,0,Úlcera péptica
+1,1,0,1,1,1,1,0,0,0,0,0,1,Gripe estacional
+0,0,0,0,1,0,0,0,0,0,0,0,0,Anemia
+1,0,0,0,0,0,0,0,0,0,0,1,0,Urticaria
+0,1,1,0,1,0,0,0,0,0,0,0,0,Vértigo
+1,1,0,1,1,0,0,0,0,0,0,0,0,Malaria
+0,0,0,0,0,0,0,0,0,1,1,0,0,Enfermedad de Crohn
+1,0,0,0,0,0,0,0,0,0,0,1,0,Psoriasis
+0,1,0,0,1,0,0,0,0,0,0,0,0,Fibromialgia
+1,1,0,1,1,1,0,1,0,0,0,0,0,Tuberculosis
+0,0,1,0,1,0,0,0,0,1,1,0,0,Reflujo gastroesofágico
+1,1,0,0,1,0,0,0,0,0,0,0,0,Chikungunya
