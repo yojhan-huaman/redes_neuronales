@@ -189,7 +189,4 @@ def update_chart():
     return {"chart_data": chart_data}
 load_data()
 if __name__ == '__main__':
-    try:
-        app.run(debug=True)
-    except Exception as e:
-        print(f"Error al cargar el modelo: {e}")
+    app.run(debug=True)
