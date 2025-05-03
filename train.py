@@ -4,7 +4,6 @@ from model import prepare_data, DiseaseClassifier, train_model, evaluate_model, 
 def main():
     print("Iniciando entrenamiento del clasificador de enfermedades...")
     
-    # Cargar y preparar los datos
     dataset_path = 'dataset.csv'
     print(f"Cargando dataset desde {dataset_path}...")
     
@@ -12,7 +11,6 @@ def main():
     
     print(f"Dataset cargado. Contiene {len(symptoms)} síntomas y {len(diseases)} enfermedades.")
     
-    # Crear el modelo
     input_size = len(symptoms)
     hidden_size = 128
     num_classes = len(diseases)
@@ -21,18 +19,14 @@ def main():
     print("Modelo creado. Estructura:")
     print(model)
     
-    # Entrenar el modelo
     print("\nIniciando entrenamiento...")
     train_model(model, X_train, y_train, epochs=100, learning_rate=0.001)
     
-    # Evaluar el modelo
     print("\nEvaluando modelo...")
     accuracy = evaluate_model(model, X_test, y_test)
     
-    # Guardar el modelo
     save_model(model, 'disease_classifier.pth')
     
-    # Guardar los datos adicionales necesarios
     print("Guardando datos adicionales...")
     with open('symptoms.pkl', 'wb') as f:
         pickle.dump(symptoms, f)
