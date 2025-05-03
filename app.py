@@ -100,15 +100,9 @@ def load_data():
         print(f"Error al cargar los datos del modelo: {e}")
         raise
 
-@app.route('/', methods=['GET', 'HEAD'])
+@app.route('/')
 def index():
-    global symptoms
-    if request.method == 'HEAD':
-        return '', 200
-
-    if symptoms is None:
-        return "Error: los datos del modelo no se cargaron correctamente.", 500
-
+    symptoms = ['Cough', 'Fever', 'Fatigue']
     return render_template('index.html', symptoms=symptoms)
 
 @app.route('/predict', methods=['POST'])
