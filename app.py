@@ -119,10 +119,8 @@ def load_data():
         print("Error: Archivos del modelo no encontrados. Ejecute train.py primero.")
         raise FileNotFoundError("No se encontraron los archivos necesarios para el modelo. Por favor, ejecute train.py.")
 
-@app.route('/', methods=['GET', 'HEAD'])
+@app.route('/')
 def index():
-    if request.method == 'HEAD':
-        return '', 200
     return render_template('index.html', symptoms=symptoms)
 
 @app.route('/predict', methods=['POST'])
