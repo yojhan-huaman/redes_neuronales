@@ -187,10 +187,9 @@ def update_chart():
 
     # Retornar el gráfico como Base64
     return {"chart_data": chart_data}
-
+load_data()
 if __name__ == '__main__':
     try:
-        load_data()
         app.run(debug=True)
     except Exception as e:
         print(f"Error al cargar el modelo: {e}")
