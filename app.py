@@ -102,8 +102,10 @@ def load_data():
 
 @app.route('/')
 def index():
-    symptoms = ['Cough', 'Fever', 'Fatigue']
-    return render_template('index.html', symptoms=symptoms)
+    global symptoms
+    # Use the global symptoms if available, or use default values if not
+    symptom_list = symptoms if symptoms is not None else ['tos', 'fiebre', 'cansancio']
+    return render_template('index.html', symptoms=symptom_list)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -155,10 +157,16 @@ def update_chart():
     chart_data = generate_pie_chart(top_diseases, is_dark_mode=dark_mode)
     return {"chart_data": chart_data}
 
+# Make sure to call load_data() before the app runs
 try:
     load_data()
 except Exception as e:
     print(f"No se pudo iniciar la app por error en load_data: {e}")
+    # It's better to initialize symptoms even if loading fails
+    symptoms = ['tos', 'fiebre', 'cansancio', 'dolor_de_cabeza', 'dolor_muscular', 
+               'dolor_de_garganta', 'dificultad_para_respirar', 'dolor_de_estomago',
+               'náuseas', 'vómitos', 'dolor_abdominal', 'escurrimiento_nasal',
+               'perdida_del_apetito', 'diarrea']
 
 if __name__ == '__main__':
     import os
