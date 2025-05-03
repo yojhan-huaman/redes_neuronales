@@ -24,7 +24,7 @@
                         <label for="symptomsSelect" class="form-label">Seleccione sus síntomas:</label>
                         <select class="form-select select2" id="symptomsSelect" name="symptoms" multiple>
                             {% for symptom in symptoms %}
-                            <option value="{{ symptom }}">{{ symptom.replace('_', ' ') | title }}</option>
+                            <option value="{{ symptom }}">{{ symptom.replace('_', ' ') | title if symptom else '' }}</option>
                             {% endfor %}
                         </select>
                         <div class="form-text">Seleccione todos los síntomas que experimenta.</div>
